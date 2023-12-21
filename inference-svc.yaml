@@ -1,0 +1,18 @@
+apiVersion: serving.kserve.io/v1beta1
+kind: InferenceService
+metadata:
+  annotations:
+    serving.knative.openshift.io/enablePassthrough: "true"
+    sidecar.istio.io/inject: "true"
+    sidecar.istio.io/rewriteAppHTTPProbers: "true"
+    serving.kserve.io/storage-initializer-uid: "1000710001"
+  name: flan-t5-small-caikit
+spec:
+  predictor:
+    serviceAccountName: sa
+    minReplicas: 1
+    model:
+      modelFormat:
+        name: caikit
+      runtime: caikit-tgis-runtime
+      storageUri: s3://modelmesh-example-models/llm/models/flan-t5-small-caikit

@@ -1,0 +1,13 @@
+artifact_path: artifacts
+bos_token: null
+caikit_nlp_version: 0.0.1
+created: '2023-07-10 16:29:05.749762'
+eos_token: </s>
+module_class: caikit_nlp.modules.text_generation.text_generation.TextGeneration
+module_id: f9181353-4ccf-4572-bd1e-f12bcda26792
+name: Text Generation
+pad_token: <pad>
+saved: '2023-07-10 16:29:05.749769'
+sep_token: null
+tracking_id: 76015f47-374a-494c-b55e-f9230895e4ee
+version: 0.1.0

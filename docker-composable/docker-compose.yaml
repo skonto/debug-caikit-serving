@@ -1,0 +1,55 @@
+services:
+  caikit:
+    image: quay.io/opendatahub/caikit-tgis-serving@sha256:08652a360e60045594b4042a37b0b3cad7e5ab8d026fd44a9dda32cd1660af2b
+    platform: linux/amd64
+    build: ..
+    volumes:
+      - ./caikit_config:/caikit/config
+      - ./models/flan-t5-small-caikit/:/mnt/models/
+    ports:
+      - 8085:8085 # grpc
+      - 8080:8080 # http
+    expose:
+      - 8085
+  tgis:
+    image: quay.io/opendatahub/text-generation-inference@sha256:efcc60c671a5da62c0251bc543f6de73f6578aac40a9a745eae3f60b0208f9e9
+    platform: linux/amd64
+    command: [
+        "text-generation-launcher", # NOTE:--num-shard defaults to 1
+        "--model-name=/mnt/models/artifacts/",
+        "--max-batch-size=256",
+        "--max-concurrent-requests=64",
+      ]
+    volumes:
+      - ./models/flan-t5-small-caikit/:/mnt/models
+    environment:
+      - "TRANSFORMERS_CACHE=/tmp/transformers_cache"
+  queue:
+    image: docker.io/skonto/queue-39be6f1d08a095bd076a71d288d295b6@sha256:a68e1e9fc146d290cb4c622f87ca03a45a9ac925d9d3a6bc49edaac89665a976
+    platform: linux/amd64
+    ports:
+      - 8013:8013
+    environment:
+     - "SERVING_NAMESPACE=kserve-demo"
+     - "SERVING_SERVICE=flan-t5-small-caikit-predictor"
+     - "SERVING_CONFIGURATION=flan-t5-small-caikit-predictor"
+     - "SERVING_REVISION=flan-t5-small-caikit-predictor-00001"
+     - "QUEUE_SERVING_PORT=8013"
+     - "QUEUE_SERVING_TLS_PORT=8112"
+     - "CONTAINER_CONCURRENCY=0"
+     - "REVISION_TIMEOUT_SECONDS=300"
+     - "REVISION_RESPONSE_START_TIMEOUT_SECONDS=0"
+     - "REVISION_IDLE_TIMEOUT_SECONDS=0"
+     - "SERVING_POD=flan-t5-small-caikit-predictor-00001-deployment-d7d684947-ll5nt"
+     - "SERVING_ENABLE_REQUEST_LOG=true"
+     - "SERVING_REQUEST_METRICS_BACKEND=prometheus"
+     - "TRACING_CONFIG_BACKEND=none"
+     - "USER_PORT=8085"
+     - "SYSTEM_NAMESPACE=knative-serving"
+     - "METRICS_DOMAIN=knative.dev/internal/serving"
+     # - "SERVING_READINESS_PROBE={"tcpSocket":{"port":8085,"host":"127.0.0.1"},"successThreshold":1}"
+     - "ENABLE_PROFILING=false"
+     - "SERVING_ENABLE_PROBE_REQUEST_LOG=false"
+     - "SERVING_LOGGING_CONFIG=''"
+     - "SERVING_LOGGING_LEVEL=debug"
+     - "SERVING_POD_IP=1.1.1.1"
