@@ -1,5 +1,5 @@
 
-Adapted from https://github.com/opendatahub-io/caikit-tgis-serving/tree/main/test
+Adapted from https://github.com/opendatahub-io/caikit-tgis-serving/tree/main/test.
 Queue proxy adapted to start a reverse proxy that calls caikit not 127.0.0.1 host (in docker compose you can access other services via their name).
 
 run to setup the containers
