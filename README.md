@@ -35,8 +35,8 @@ MINIO_NS=minio
 
 oc new-project ${MINIO_NS}
 oc apply -f ./minio.yaml -n ${MINIO_NS}
-sed "s/<minio_ns>/$MINIO_NS/g" ./custom-manifests/minio/minio-secret.yaml | tee ./minio-secret-current.yaml | oc -n ${MINIO_NS} apply -f -
-sed "s/<minio_ns>/$MINIO_NS/g" ./custom-manifests/minio/serviceaccount-minio.yaml | tee ./serviceaccount-minio-current.yaml | oc -n ${MINIO_NS} apply -f -
+sed "s/<minio_ns>/$MINIO_NS/g" ./minio-secret.yaml | tee ./minio-secret-current.yaml | oc -n ${MINIO_NS} apply -f -
+sed "s/<minio_ns>/$MINIO_NS/g" ./serviceaccount-minio.yaml | tee ./serviceaccount-minio-current.yaml | oc -n ${MINIO_NS} apply -f -
 
 export TEST_NS=kserve-demo
 oc new-project ${TEST_NS}
@@ -46,6 +46,8 @@ oc apply -f serviceaccount-minio-current.yaml -n ${TEST_NS}
 oc apply -f minio-secret-current.yaml -n ${TEST_NS}
 
 oc apply -f runtime.yaml -n ${TEST_NS}
+
+# Make sure you have the right uid annotation: serving.kserve.io/storage-initializer-uid:
 
 oc apply -f inference-svc.yaml -n ${TEST_NS}
 
@@ -60,6 +62,12 @@ $  grpcurl -d '{"text": "At what temperature does liquid Nitrogen boil?"}' -H 'm
 },
 "input_token_count": "10"
 }
+
+
+grpcurl -d '{"text": "At what temperature does liquid Nitrogen boil?"}' -H 'mm-model-id: flan-t5-small-caikit' --insecure flan-t5-small-caikit-predictor-kserve-demo.apps.ci-ln-fk0t8qt-76ef8.origin-ci-int-aws.dev.rhcloud.com caikit.runtime.Nlp.NlpService/TextGenerationTaskPredict
+
+  curl -k -d '{"text": "At what temperature does liquid Nitrogen boil?"}'  https://flan-t5-small-caikit-predictor-kserve-demo.apps.ci-ln-fk0t8qt-76ef8.origin-ci-int-aws.dev.rhcloud.com:443/api/v1/task/text-generation
+
 
 $ curl -k -d '{"text": "At what temperature does liquid Nitrogen boil?"}'  https://flan-t5-small-caikit-predictor-kserve-demo.apps.ci-ln-h2v45ck-76ef8.origin-ci-int-aws.dev.rhcloud.com:443/api/v1/task/text-generation
 stream error: stream ID 21; INTERNAL_ERROR; received from peer

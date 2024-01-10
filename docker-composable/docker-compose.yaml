@@ -1,6 +1,6 @@
 services:
   caikit:
-    image: quay.io/opendatahub/caikit-tgis-serving@sha256:08652a360e60045594b4042a37b0b3cad7e5ab8d026fd44a9dda32cd1660af2b
+    image: quay.io/opendatahub/caikit-tgis-serving:fast
     platform: linux/amd64
     build: ..
     volumes:
@@ -12,7 +12,7 @@ services:
     expose:
       - 8085
   tgis:
-    image: quay.io/opendatahub/text-generation-inference@sha256:efcc60c671a5da62c0251bc543f6de73f6578aac40a9a745eae3f60b0208f9e9
+    image: quay.io/opendatahub/text-generation-inference:stable
     platform: linux/amd64
     command: [
         "text-generation-launcher", # NOTE:--num-shard defaults to 1
@@ -30,6 +30,7 @@ services:
     ports:
       - 8013:8013
     environment:
+     - "GODEBUG=http2debug=2"
      - "SERVING_NAMESPACE=kserve-demo"
      - "SERVING_SERVICE=flan-t5-small-caikit-predictor"
      - "SERVING_CONFIGURATION=flan-t5-small-caikit-predictor"
